@@ -3108,7 +3108,7 @@ async function handleDonation() {
             },
             body: JSON.stringify({ 
                 amount: 10,
-                receipt: `donation_${Date.now()}`,
+                receipt: `donation_${Date.now()}_${userId}`,
                 userId: userId || 'anonymous'
             })
         });
@@ -3123,28 +3123,69 @@ async function handleDonation() {
             throw new Error(orderData.error || 'Payment setup failed');
         }
 
-        // ✅ Now you have key_id from Edge Function
         console.log('Key ID received:', orderData.key_id);
         
         await loadRazorpayScript();
 
         const options = {
-            key: orderData.key_id, // ✅ Use the key from Edge Function
+            key: orderData.key_id,
             amount: orderData.order.amount,
             currency: orderData.order.currency,
             name: "Choose a Game",
             description: "Community Support Donation - ₹10",
             order_id: orderData.order.id,
-            handler: function(response) {
-                console.log('Payment successful:', response);
-                showToast('❤️ Thank you for your support!', 'success');
+            // ✅ ADD THIS HANDLER TO VERIFY PAYMENT
+            handler: async function(response) {
+                try {
+                    showToast('🔄 Verifying payment...', 'info');
+                    
+                    // ✅ CALL YOUR VERIFY PAYMENT FUNCTION
+                    const verifyResponse = await fetch(
+                        'https://zfcndiuombmzehnnvawm.supabase.co/functions/v1/verifyPayment',
+                        {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpmY25kaXVvbWJtemVobm52YXdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzNTkyNTksImV4cCI6MjA4MDkzNTI1OX0.wfUvcghCIWsPAU7GhKS0H8GfyLotn_Kw2Zarwu4Z5ms'
+                            },
+                            body: JSON.stringify({
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                userId: userId || 'anonymous'
+                            })
+                        }
+                    );
+
+                    const verification = await verifyResponse.json();
+                    
+                    if (verification.success) {
+                        showToast('❤️ Thank you for your support! Payment verified.', 'success');
+                        console.log('Payment verified and stored:', verification);
+                        
+                        // Update donation count
+                        trackDonation();
+                    } else {
+                        showToast(`⚠️ Payment verification failed: ${verification.error}`, 'error');
+                        console.error('Payment verification failed:', verification);
+                    }
+                    
+                } catch (error) {
+                    console.error('Verification error:', error);
+                    showToast('⚠️ Could not verify payment. Please contact support.', 'error');
+                }
             },
             prefill: {
                 name: "Supporter",
                 email: "",
                 contact: ""
             },
-            theme: { color: "#FF6B6B" }
+            theme: { color: "#FF6B6B" },
+            modal: {
+                ondismiss: function() {
+                    showToast('Payment cancelled', 'info');
+                }
+            }
         };
 
         const rzp = new window.Razorpay(options);
