@@ -3098,24 +3098,23 @@ donateButton.addEventListener('click', handleDonation);
 
 async function handleDonation() {
     try {
-        showToast('🔄 Processing donation...', 'info');
+        showToast('🔄 Creating donation order...', 'info');
         
-        // 1. Call your Edge Function to create order
         const response = await fetch('https://zfcndiuombmzehnnvawm.supabase.co/functions/v1/createOrder', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpmY25kaXVvbWJtemVobm52YXdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzNTkyNTksImV4cCI6MjA4MDkzNTI1OX0.wfUvcghCIWsPAU7GhKS0H8GfyLotn_Kw2Zarwu4Z5ms'
             },
             body: JSON.stringify({ 
                 amount: 10,
-                receipt: `donation_${Date.now()}_${userId.substring(0, 8)}`,
-                userId: userId
+                receipt: `donation_${Date.now()}`,
+                userId: userId || 'anonymous'
             })
         });
 
         if (!response.ok) {
-            throw new Error('Failed to create payment order');
+            throw new Error(`Failed to create order: ${response.status}`);
         }
 
         const orderData = await response.json();
@@ -3124,70 +3123,36 @@ async function handleDonation() {
             throw new Error(orderData.error || 'Payment setup failed');
         }
 
-        // 2. Load Razorpay script dynamically
+        // ✅ Now you have key_id from Edge Function
+        console.log('Key ID received:', orderData.key_id);
+        
         await loadRazorpayScript();
 
-        // 3. Initialize Razorpay with server-provided key
         const options = {
-            key: orderData.key_id, // Public key from server
+            key: orderData.key_id, // ✅ Use the key from Edge Function
             amount: orderData.order.amount,
             currency: orderData.order.currency,
             name: "Choose a Game",
             description: "Community Support Donation - ₹10",
             order_id: orderData.order.id,
-            handler: async function(paymentResponse) {
-                console.log('Payment successful:', paymentResponse);
-                
-                // Verify payment on your server (IMPORTANT!)
-                const verifyResponse = await fetch('https://zfcndiuombmzehnnvawm.supabase.co/functions/v1/verifyPayment', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                    },
-                    body: JSON.stringify({
-                        razorpay_payment_id: paymentResponse.razorpay_payment_id,
-                        razorpay_order_id: paymentResponse.razorpay_order_id,
-                        razorpay_signature: paymentResponse.razorpay_signature,
-                        order_id: orderData.order.id
-                    })
-                });
-                
-                const verification = await verifyResponse.json();
-                
-                if (verification.success) {
-                    trackDonation();
-                    showToast('❤️ Thank you for supporting our community!', 'success');
-                } else {
-                    showToast('Payment verification failed. Please contact support.', 'error');
-                }
+            handler: function(response) {
+                console.log('Payment successful:', response);
+                showToast('❤️ Thank you for your support!', 'success');
             },
             prefill: {
                 name: "Supporter",
                 email: "",
                 contact: ""
             },
-            theme: {
-                color: "#FF6B6B"
-            },
-            modal: {
-                ondismiss: function() {
-                    showToast('Donation cancelled. You can support us anytime! 🙏', 'info');
-                }
-            }
+            theme: { color: "#FF6B6B" }
         };
 
         const rzp = new window.Razorpay(options);
         rzp.open();
 
-        rzp.on('payment.failed', function(response) {
-            console.error('Payment failed:', response.error);
-            showToast(`Payment failed: ${response.error.description || 'Please try again'}`, 'error');
-        });
-
     } catch (error) {
         console.error('Donation error:', error);
-        showToast(`Donation error: ${error.message}`, 'error');
+        showToast(`Error: ${error.message}`, 'error');
     }
 }
 
