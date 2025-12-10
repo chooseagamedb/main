@@ -10,6 +10,158 @@
     <style>
         /* Light Theme Variables */
         :root {
+        /* About/Privacy/Terms/Contact Modals */
+.legal-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2002;
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition-smooth);
+    padding: 1rem;
+}
+
+.legal-modal.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.legal-modal-content {
+    background: var(--color-bg-modal);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 700px;
+    max-height: 85vh;
+    overflow-y: auto;
+    transform: translateY(30px) scale(0.95);
+    transition: transform var(--transition-smooth), background-color 0.5s ease;
+    box-shadow: var(--shadow-modal);
+    border: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+}
+
+.legal-modal.active .legal-modal-content {
+    transform: translateY(0) scale(1);
+}
+
+.legal-modal-header {
+    padding: 1.5rem 1.5rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    background: var(--color-bg-modal);
+    z-index: 1;
+}
+
+.legal-modal-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    transition: color 0.5s ease;
+}
+
+.legal-modal-close {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    font-size: 1.75rem;
+    cursor: pointer;
+    padding: 8px;
+    transition: color var(--transition-fast);
+}
+
+.legal-modal-close:hover {
+    color: var(--color-text-primary);
+}
+
+.legal-modal-body {
+    padding: 1.5rem;
+    color: var(--color-text-secondary);
+    line-height: 1.7;
+}
+
+.legal-modal-section {
+    margin-bottom: 2rem;
+}
+
+.legal-modal-section:last-child {
+    margin-bottom: 0;
+}
+
+.legal-modal-section h3 {
+    color: var(--color-text-primary);
+    margin-bottom: 0.75rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.legal-modal-section h4 {
+    color: var(--color-text-secondary);
+    margin: 1.5rem 0 0.5rem 0;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.legal-modal-section p {
+    margin-bottom: 1rem;
+}
+
+.legal-modal-section ul {
+    margin: 0.5rem 0 1rem 1.5rem;
+    color: var(--color-text-secondary);
+}
+
+.legal-modal-section li {
+    margin-bottom: 0.5rem;
+}
+
+.legal-modal-section strong {
+    color: var(--color-text-primary);
+    font-weight: 600;
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.contact-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.contact-item i {
+    color: var(--color-primary);
+    margin-top: 3px;
+    font-size: 1.1rem;
+    width: 20px;
+}
+
+.contact-link {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.contact-link:hover {
+    color: var(--color-primary-dark);
+    text-decoration: underline;
+}
             /* Primary Accents */
             --color-primary: #00b0fc;
             --color-primary-light: #76d5fe;
@@ -1331,6 +1483,221 @@
 
     <!-- Main App -->
     <div class="app-container">
+        <!-- About Modal -->
+<div class="legal-modal" id="aboutModal">
+    <div class="legal-modal-content">
+        <div class="legal-modal-header">
+            <h2 class="legal-modal-title">About Choose a Game</h2>
+            <button class="legal-modal-close" data-modal="about">&times;</button>
+        </div>
+        <div class="legal-modal-body">
+            <div class="legal-modal-section">
+                <h3>The Gamer's Database</h3>
+                <p>Choose a Game is an open-source gaming database built <strong>by gamers, for gamers</strong>. We believe in the power of community-driven information to help fellow gamers make better choices about what to play next.</p>
+                
+                <p>This platform is a shared space where gamers can:</p>
+                <ul>
+                    <li><strong>Share game information</strong> with the community</li>
+                    <li><strong>Rate and review games</strong> to help others</li>
+                    <li><strong>Filter games by system requirements</strong> to find what works on their setup</li>
+                    <li><strong>Discover new adventures</strong> through community recommendations</li>
+                </ul>
+            </div>
+            
+            <div class="legal-modal-section">
+                <h3>How It Works</h3>
+                <p>Every piece of information here comes from <strong>fellow gamers</strong>. Anyone can add games, rate them, and help build this community resource. All uploaded information is visible to all users - we believe in transparency and shared knowledge.</p>
+            </div>
+            
+            <div class="legal-modal-section">
+                <h3>Our Philosophy</h3>
+                <p>We're not a corporate platform. We're gamers helping gamers. The data belongs to the community, and everyone contributes to making it better.</p>
+                <p>Remember: <strong>This is a public platform</strong>. Anything you upload can be seen by others, so please be respectful and accurate with your contributions.</p>
+            </div>
+            
+            <div class="legal-modal-section">
+                <h3>Join the Community</h3>
+                <p>Help fellow gamers by adding games you love, rating ones you've played, and keeping information updated. Together, we build a better gaming resource for everyone.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Privacy Modal -->
+<div class="legal-modal" id="privacyModal">
+    <div class="legal-modal-content">
+        <div class="legal-modal-header">
+            <h2 class="legal-modal-title">Privacy & Data</h2>
+            <button class="legal-modal-close" data-modal="privacy">&times;</button>
+        </div>
+        <div class="legal-modal-body">
+            <div class="legal-modal-section">
+                <h3>Simple Privacy Facts</h3>
+                <p>We keep things straightforward:</p>
+                <ul>
+                    <li><strong>Public Platform:</strong> All game information, ratings, and reviews you add are visible to everyone</li>
+                    <li><strong>Anonymous Contributions:</strong> You don't need to create an account - contributions are tied to your browser</li>
+                    <li><strong>No Personal Data:</strong> We don't collect email addresses, names, or personal information</li>
+                    <li><strong>Game Info Only:</strong> We only store game-related information you choose to share</li>
+                </ul>
+            </div>
+            
+            <div class="legal-modal-section">
+                <h3>What Happens to Your Data</h3>
+                <p><strong>Important:</strong> Any game information you add becomes part of our community database and can be seen by all users.</p>
+                <p>You can edit or delete your own contributions at any time. Community ratings help everyone find the best games to play.</p>
+            </div>
+            
+            <div class="legal-modal-section">
+                <h3>Your Responsibility</h3>
+                <p>Since this is a community-driven platform, it's every user's responsibility to:</p>
+                <ul>
+                    <li>Only upload information you have the right to share</li>
+                    <li>Keep content appropriate and respectful</li>
+                    <li>Report incorrect or problematic content</li>
+                    <li>Help maintain the quality of our shared resource</li>
+                </ul>
+            </div>
+            
+            <div class="legal-modal-section">
+                <h3>Third-Party Content</h3>
+                <p>Game trailers are embedded from YouTube. When you watch videos here, YouTube's own policies apply for their content.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Terms Modal -->
+<div class="legal-modal" id="termsModal">
+    <div class="legal-modal-content">
+        <div class="legal-modal-header">
+            <h2 class="legal-modal-title">Terms of Use</h2>
+            <button class="legal-modal-close" data-modal="terms">&times;</button>
+        </div>
+        <div class="legal-modal-body">
+            <div class="legal-modal-section">
+                <h3>Community Rules</h3>
+                <p>By using Choose a Game, you agree to these simple rules:</p>
+                <ul>
+                    <li><strong>Be Helpful:</strong> Contribute accurate information that helps fellow gamers</li>
+                    <li><strong>Be Respectful:</strong> This is a shared space for all gamers</li>
+                    <li><strong>Be Responsible:</strong> You're accountable for what you upload</li>
+                    <li><strong>Game Info Only:</strong> Keep content focused on gaming information</li>
+                </ul>
+            </div>
+            
+            <div class="legal-modal-section">
+                <h3>⚠️ Important Copyright Notice</h3>
+                <p><strong>DISCLAIMER:</strong> Choose a Game is a community database for sharing gaming information. We do not host, distribute, or own any of the games listed here.</p>
+                
+                <p><strong>Game Content:</strong> All game titles, characters, artwork, and related content are property of their respective owners. We only provide information about games, not the games themselves.</p>
+                
+                <p><strong>Trailers & Images:</strong> We use YouTube's embed feature for trailers and publicly available images for game covers. We don't host copyrighted material directly.</p>
+                
+                <p><strong>Your Responsibility:</strong> When adding content, ensure you have the right to share it. Don't upload copyrighted material you don't have permission to use.</p>
+            </div>
+            
+            <div class="legal-modal-section">
+                <h3>Content Guidelines</h3>
+                <p>Do NOT upload:</p>
+                <ul>
+                    <li>Pirated or illegal content</li>
+                    <li>Copyrighted material you don't own or have permission to share</li>
+                    <li>Offensive, harmful, or inappropriate content</li>
+                    <li>Personal information of yourself or others</li>
+                    <li>Commercial promotions or spam</li>
+                </ul>
+                
+                <p>We reserve the right to remove any content that violates these guidelines.</p>
+            </div>
+            
+            <div class="legal-modal-section">
+                <h3>Community Spirit</h3>
+                <p>This platform exists to help gamers. We rely on the community to keep it clean, accurate, and useful for everyone. If you see incorrect information, help by adding better information or reporting issues.</p>
+                
+                <p>Remember: Everything you add is public and helps other gamers make better choices.</p>
+            </div>
+            
+            <div class="legal-modal-section">
+                <h3>Limitations</h3>
+                <p>This service is provided as-is by gamers for gamers. We make no guarantees about uptime, data permanence, or accuracy of user-submitted content. Always verify information before making decisions.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contact Modal -->
+<div class="legal-modal" id="contactModal">
+    <div class="legal-modal-content">
+        <div class="legal-modal-header">
+            <h2 class="legal-modal-title">Support & Contact</h2>
+            <button class="legal-modal-close" data-modal="contact">&times;</button>
+        </div>
+        <div class="legal-modal-body">
+            <div class="legal-modal-section">
+                <h3>Need Help?</h3>
+                <p>This is a community project. While there's no formal support team, here's how you can get help or contribute:</p>
+            </div>
+            
+            <div class="legal-modal-section">
+                <h3>Getting Started</h3>
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <i class="fas fa-gamepad"></i>
+                        <div>
+                            <strong>Add Games:</strong><br>
+                            <span>Click "Add Game" in the top right to contribute</span>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <i class="fas fa-star"></i>
+                        <div>
+                            <strong>Rate Games:</strong><br>
+                            <span>Click any game to view details and add your rating</span>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <i class="fas fa-filter"></i>
+                        <div>
+                            <strong>Find Games:</strong><br>
+                            <span>Use filters to find games that work on your system</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="legal-modal-section">
+                <h3>Common Issues</h3>
+                <p><strong>Can't see your added game?</strong> Try refreshing the page or checking filters.</p>
+                <p><strong>Wrong information on a game?</strong> Edit it if you added it, or add correct information as a new entry.</p>
+                <p><strong>YouTube trailer not working?</strong> The video may have been removed - you can update the YouTube ID.</p>
+            </div>
+            
+            <div class="legal-modal-section">
+                <h3>Reporting Problems</h3>
+                <p>If you encounter:</p>
+                <ul>
+                    <li>Inappropriate content</li>
+                    <li>Copyright violations</li>
+                    <li>Serious platform issues</li>
+                </ul>
+                <p>Please note: This is a community project. While we'll do our best, response times aren't guaranteed.</p>
+            </div>
+            
+            <div class="legal-modal-section">
+                <h3>Contribute to the Project</h3>
+                <p>This is an open-source project. If you're a developer or designer, consider contributing to make it better for everyone.</p>
+            </div>
+            
+            <div class="legal-modal-section">
+                <h3>Community First</h3>
+                <p>Remember: This platform works because gamers help each other. The best way to get help is to be part of the community that helps others.</p>
+            </div>
+        </div>
+    </div>
+</div>
         <!-- Navigation -->
         <nav class="main-nav">
             <div class="nav-container">
@@ -1465,11 +1832,11 @@
         <footer class="main-footer">
             <div class="footer-content">
                 <div class="footer-links">
-                    <a href="#" class="footer-link">About</a>
-                    <a href="#" class="footer-link">Privacy</a>
-                    <a href="#" class="footer-link">Terms</a>
-                    <a href="#" class="footer-link">Contact</a>
-                </div>
+    <a href="#" class="footer-link" data-modal="about">About</a>
+    <a href="#" class="footer-link" data-modal="privacy">Privacy</a>
+    <a href="#" class="footer-link" data-modal="terms">Terms</a>
+    <a href="#" class="footer-link" data-modal="contact">Contact</a>
+</div>
                 <p class="footer-copyright">© 2025 Choose a Game. All rights reserved.</p>
             </div>
         </footer>
@@ -1776,6 +2143,63 @@
         
         // Setup event listeners
         function setupEventListeners() {
+            // Legal modals event listeners
+document.querySelectorAll('.footer-link[data-modal]').forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const modalType = link.dataset.modal;
+        showLegalModal(modalType);
+    });
+});
+
+document.querySelectorAll('.legal-modal-close').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const modalType = btn.dataset.modal;
+        hideLegalModal(modalType);
+    });
+});
+
+document.querySelectorAll('.legal-modal').forEach(modal => {
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            const modalId = modal.id.replace('Modal', '').toLowerCase();
+            hideLegalModal(modalId);
+        }
+    });
+});
+// Show legal modal
+function showLegalModal(type) {
+    const modal = document.getElementById(`${type}Modal`);
+    if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        
+        // Close any other open modals
+        closeAllModalsExcept(type);
+    }
+}
+
+// Hide legal modal
+function hideLegalModal(type) {
+    const modal = document.getElementById(`${type}Modal`);
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+
+// Close all modals except the specified one
+function closeAllModalsExcept(excludeType) {
+    const modals = ['about', 'privacy', 'terms', 'contact', 'addGame', 'gameDetails'];
+    modals.forEach(modalType => {
+        if (modalType !== excludeType && modalType !== 'gameDetails') {
+            const modal = document.getElementById(`${modalType}Modal`);
+            if (modal) {
+                modal.classList.remove('active');
+            }
+        }
+    });
+}
             searchInput.addEventListener('input', debounce(handleSearch, 300));
             document.getElementById('sortSelect').addEventListener('change', handleFilterChange);
             document.getElementById('genreFilter').addEventListener('change', handleFilterChange);
@@ -2737,6 +3161,7 @@
                 toggleTheme();
             }
         });
+        
         
         // Console welcome message
         console.log('%c🎮 Choose a Game 🎮', 'font-size: 20px; font-weight: bold; color: #00b0fc;');
