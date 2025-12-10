@@ -399,7 +399,7 @@
             transition: color 0.5s ease;
         }
 
-        /* Filters Section - UPDATED */
+        /* Filters Section */
         .filters-section {
             max-width: 1400px;
             margin: 0 auto 2rem;
@@ -533,6 +533,52 @@
             background: rgba(30, 41, 59, 0.95);
         }
 
+        /* Edit/Delete buttons on game card */
+        .game-actions {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 2;
+        }
+
+        .game-card:hover .game-actions {
+            opacity: 1;
+        }
+
+        .game-action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .dark-theme .game-action-btn {
+            background: rgba(30, 41, 59, 0.95);
+            color: var(--color-text-secondary);
+        }
+
+        .game-action-btn:hover {
+            transform: scale(1.1);
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .game-action-btn.delete:hover {
+            background: var(--color-accent-red);
+        }
+
         .game-info {
             padding: 1.5rem;
         }
@@ -550,6 +596,15 @@
             color: var(--color-text-primary);
             line-height: 1.3;
             transition: color 0.5s ease;
+        }
+
+        .game-creator {
+            font-size: 0.8rem;
+            color: var(--color-text-muted);
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .game-genre {
@@ -651,6 +706,40 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
+            position: relative;
+        }
+
+        .game-details-actions {
+            position: absolute;
+            top: 2rem;
+            right: 4rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .game-details-action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: var(--color-bg-hover);
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .game-details-action-btn:hover {
+            transform: scale(1.1);
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .game-details-action-btn.delete:hover {
+            background: var(--color-accent-red);
         }
 
         .game-details-title {
@@ -686,6 +775,11 @@
         @media (max-width: 768px) {
             .game-details-body {
                 grid-template-columns: 1fr;
+            }
+            
+            .game-details-actions {
+                top: 1.5rem;
+                right: 3.5rem;
             }
         }
 
@@ -784,7 +878,7 @@
             margin-bottom: 1rem;
         }
 
-        /* Requirements Section - NEW */
+        /* Requirements Section */
         .requirements-section {
             margin-top: 1.5rem;
             padding-top: 1.5rem;
@@ -814,12 +908,6 @@
         .requirement-value {
             font-weight: 600;
             color: var(--color-text-primary);
-        }
-
-        .game-details-actions {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1rem;
         }
 
         .rate-game-section {
@@ -878,7 +966,7 @@
             cursor: not-allowed;
         }
 
-        /* Add Game Modal */
+        /* Add/Edit Game Modal */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -981,7 +1069,7 @@
             box-shadow: 0 0 0 3px rgba(118, 213, 254, 0.2);
         }
 
-        /* Requirements Grid in Add Game Modal - NEW */
+        /* Requirements Grid in Add Game Modal */
         .requirements-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -1031,6 +1119,16 @@
 
         .btn-secondary:hover {
             background: var(--color-border);
+        }
+
+        .btn-danger {
+            background: var(--color-accent-red);
+            color: white;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: #dc2626;
+            transform: translateY(-2px);
         }
 
         /* Toast Notification */
@@ -1367,7 +1465,7 @@
         <footer class="main-footer">
             <div class="footer-content">
                 <div class="footer-links">
-                    <a href="about" class="footer-link">About</a>
+                    <a href="#" class="footer-link">About</a>
                     <a href="#" class="footer-link">Privacy</a>
                     <a href="#" class="footer-link">Terms</a>
                     <a href="#" class="footer-link">Contact</a>
@@ -1380,6 +1478,9 @@
         <div class="game-details-modal" id="gameDetailsModal">
             <div class="game-details-content">
                 <div class="game-details-header">
+                    <div class="game-details-actions" id="gameDetailsActions">
+                        <!-- Edit/Delete buttons will be added here -->
+                    </div>
                     <h2 class="game-details-title" id="gameDetailsTitle">Game Title</h2>
                     <button class="game-details-close" id="closeGameDetails">&times;</button>
                 </div>
@@ -1448,15 +1549,17 @@
             </div>
         </div>
 
-        <!-- Add Game Modal -->
+        <!-- Add/Edit Game Modal -->
         <div class="modal-overlay" id="addGameModal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2 class="modal-title">Add New Game</h2>
+                    <h2 class="modal-title" id="modalTitle">Add New Game</h2>
                     <button class="modal-close" id="closeModal">&times;</button>
                 </div>
                 <div class="modal-body">
                     <form id="gameForm">
+                        <input type="hidden" id="editGameId" value="">
+                        
                         <div class="form-group">
                             <label class="form-label">Game Title *</label>
                             <input type="text" class="form-input" id="gameTitle" required placeholder="Enter game title">
@@ -1547,6 +1650,10 @@
                             <button type="submit" class="btn btn-primary" id="submitBtn">
                                 <i class="fas fa-plus"></i>
                                 Add Game
+                            </button>
+                            <button type="button" class="btn btn-danger" id="deleteGameBtn" style="display: none;">
+                                <i class="fas fa-trash"></i>
+                                Delete Game
                             </button>
                         </div>
                     </form>
@@ -1643,6 +1750,8 @@
         let currentSelectedRating = 0;
         let currentGameId = null;
         let currentUserRating = null;
+        let isEditMode = false;
+        let currentEditingGame = null;
         
         // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
@@ -1675,11 +1784,12 @@
             document.getElementById('ramFilter').addEventListener('change', handleFilterChange);
             document.getElementById('storageFilter').addEventListener('change', handleFilterChange);
             document.getElementById('loadMoreBtn').addEventListener('click', loadMoreGames);
-            document.getElementById('openAddGameModal').addEventListener('click', () => toggleModal(true));
+            document.getElementById('openAddGameModal').addEventListener('click', openAddGameModal);
             document.getElementById('closeModal').addEventListener('click', () => toggleModal(false));
             document.getElementById('cancelBtn').addEventListener('click', () => toggleModal(false));
             document.getElementById('closeGameDetails').addEventListener('click', () => toggleGameDetailsModal(false));
             gameForm.addEventListener('submit', handleFormSubmit);
+            document.getElementById('deleteGameBtn').addEventListener('click', deleteGame);
             
             // Rating stars
             const ratingStars = document.querySelectorAll('.rating-star');
@@ -1701,6 +1811,57 @@
             });
             
             setupLazyLoading();
+        }
+        
+        // Open add game modal (reset form)
+        function openAddGameModal() {
+            isEditMode = false;
+            currentEditingGame = null;
+            
+            document.getElementById('modalTitle').textContent = 'Add New Game';
+            document.getElementById('submitBtn').innerHTML = '<i class="fas fa-plus"></i> Add Game';
+            document.getElementById('deleteGameBtn').style.display = 'none';
+            document.getElementById('editGameId').value = '';
+            
+            // Reset form
+            gameForm.reset();
+            document.getElementById('gameDate').valueAsDate = new Date();
+            
+            toggleModal(true);
+        }
+        
+        // Open edit game modal
+        function openEditGameModal(game) {
+            isEditMode = true;
+            currentEditingGame = game;
+            
+            document.getElementById('modalTitle').textContent = 'Edit Game';
+            document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> Save Changes';
+            document.getElementById('deleteGameBtn').style.display = 'block';
+            document.getElementById('editGameId').value = game.id;
+            
+            // Fill form with game data
+            document.getElementById('gameTitle').value = game.name;
+            document.getElementById('gameGenre').value = game.genre;
+            document.getElementById('gameDate').value = game.release_date;
+            document.getElementById('gameDescription').value = game.description || '';
+            document.getElementById('gameYoutubeId').value = game.youtube_id || '';
+            document.getElementById('gameImage').value = game.image_url || '';
+            
+            // Fill system requirements
+            if (game.requirements) {
+                document.getElementById('gameGraphics').value = game.requirements.graphics || '';
+                document.getElementById('gameRam').value = game.requirements.ram || '';
+                document.getElementById('gameStorage').value = game.requirements.storage || '';
+                document.getElementById('gameProcessor').value = game.requirements.processor || '';
+            } else {
+                document.getElementById('gameGraphics').value = '';
+                document.getElementById('gameRam').value = '';
+                document.getElementById('gameStorage').value = '';
+                document.getElementById('gameProcessor').value = '';
+            }
+            
+            toggleModal(true);
         }
         
         // Setup lazy loading
@@ -1765,7 +1926,8 @@
                         averageRating: Math.round(averageRating * 10) / 10,
                         ratingCount: ratings.length,
                         userRatings: ratings,
-                        requirements: requirements
+                        requirements: requirements,
+                        isOwner: game.created_by === userId
                     };
                 });
                 
@@ -1866,11 +2028,27 @@
                             ${graphicsBadge}
                         </div>
                     </div>
+                    ${game.isOwner ? `
+                        <div class="game-actions">
+                            <button class="game-action-btn edit-game" title="Edit Game">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="game-action-btn delete delete-game" title="Delete Game">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    ` : ''}
                 </div>
                 <div class="game-info">
                     <div class="game-header">
                         <h3 class="game-title" title="${game.name}">${game.name}</h3>
                     </div>
+                    ${game.created_by === userId ? `
+                        <div class="game-creator">
+                            <i class="fas fa-user"></i>
+                            <span>Your Game</span>
+                        </div>
+                    ` : ''}
                     <div class="game-genre">${game.genre}</div>
                     <div class="game-meta">
                         <div class="game-date">
@@ -1886,7 +2064,28 @@
             `;
             
             // Add click event to show game details
-            card.addEventListener('click', () => showGameDetails(game));
+            card.addEventListener('click', (e) => {
+                // Don't trigger if clicking on edit/delete buttons
+                if (!e.target.closest('.game-action-btn')) {
+                    showGameDetails(game);
+                }
+            });
+            
+            // Add edit/delete event listeners if user is owner
+            if (game.isOwner) {
+                const editBtn = card.querySelector('.edit-game');
+                const deleteBtn = card.querySelector('.delete-game');
+                
+                editBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openEditGameModal(game);
+                });
+                
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    confirmDeleteGame(game);
+                });
+            }
             
             return card;
         }
@@ -1971,9 +2170,12 @@
             if (youtubeId) {
                 youtubePlayer.innerHTML = `
                     <iframe 
-                        src="https://www.youtube.com/embed/${youtubeId}?rel=0&modestbranding=1&autoplay=0&enablejsapi=1" 
-                        title="${game.name} Trailer"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        width="560" 
+                        height="315" 
+                        src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&controls=1&loop=1&playlist=${youtubeId}"
+                        title="YouTube video player"
+                        frameborder="0"
+                        allow="autoplay; encrypted-media"
                         allowfullscreen>
                     </iframe>
                 `;
@@ -1986,6 +2188,32 @@
                         </div>
                     </div>
                 `;
+            }
+            
+            // Update edit/delete buttons in modal header if user is owner
+            const actionsContainer = document.getElementById('gameDetailsActions');
+            actionsContainer.innerHTML = '';
+            
+            if (game.created_by === userId) {
+                actionsContainer.innerHTML = `
+                    <button class="game-details-action-btn edit-game" title="Edit Game">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="game-details-action-btn delete delete-game" title="Delete Game">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                
+                // Add event listeners for modal buttons
+                actionsContainer.querySelector('.edit-game').addEventListener('click', () => {
+                    toggleGameDetailsModal(false);
+                    setTimeout(() => openEditGameModal(game), 300);
+                });
+                
+                actionsContainer.querySelector('.delete-game').addEventListener('click', () => {
+                    toggleGameDetailsModal(false);
+                    setTimeout(() => confirmDeleteGame(game), 300);
+                });
             }
             
             // Update rating stars based on user's existing rating
@@ -2300,7 +2528,7 @@
             }
         }
         
-        // Handle form submission
+        // Handle form submission (add/edit)
         async function handleFormSubmit(e) {
             e.preventDefault();
             
@@ -2309,7 +2537,9 @@
             
             try {
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+                submitBtn.innerHTML = isEditMode 
+                    ? '<i class="fas fa-spinner fa-spin"></i> Saving...'
+                    : '<i class="fas fa-spinner fa-spin"></i> Adding...';
                 
                 // Extract YouTube ID from input
                 const youtubeInput = document.getElementById('gameYoutubeId').value.trim();
@@ -2335,7 +2565,7 @@
                     youtube_id: youtubeId,
                     image_url: document.getElementById('gameImage').value.trim() || null,
                     system_requirements: systemRequirements,
-                    created_at: new Date().toISOString()
+                    created_by: userId
                 };
                 
                 // Validation
@@ -2343,38 +2573,102 @@
                     throw new Error('Please fill in all required fields');
                 }
                 
-                // Add to Supabase
-                const { data, error } = await supabase
-                    .from('games')
-                    .insert([gameData])
-                    .select();
+                if (isEditMode && currentEditingGame) {
+                    // Update existing game
+                    const gameId = document.getElementById('editGameId').value;
+                    
+                    const { data, error } = await supabase
+                        .from('games')
+                        .update(gameData)
+                        .eq('id', gameId)
+                        .eq('created_by', userId) // Ensure user owns the game
+                        .select();
+                    
+                    if (error) throw error;
+                    
+                    if (data.length === 0) {
+                        throw new Error('Game not found or you do not have permission to edit it');
+                    }
+                    
+                    showToast('Game updated successfully! 🎮', 'success');
+                } else {
+                    // Add new game
+                    gameData.created_at = new Date().toISOString();
+                    
+                    const { data, error } = await supabase
+                        .from('games')
+                        .insert([gameData])
+                        .select();
+                    
+                    if (error) throw error;
+                    
+                    showToast('Game added successfully! 🎮', 'success');
+                }
                 
-                if (error) throw error;
-                
-                // Add to local state
-                const newGame = {
-                    ...data[0],
-                    averageRating: 0,
-                    ratingCount: 0,
-                    userRatings: []
-                };
-                
-                games.unshift(newGame);
-                filteredGames.unshift(newGame);
-                
-                // Update UI
-                renderGames();
+                // Refresh game data
+                await loadGames();
                 toggleModal(false);
-                showToast('Game added successfully! 🎮', 'success');
                 
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 
             } catch (error) {
-                console.error('Error adding game:', error);
-                showToast(error.message || 'Failed to add game', 'error');
+                console.error('Error saving game:', error);
+                showToast(error.message || 'Failed to save game', 'error');
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalText;
+            }
+        }
+        
+        // Confirm delete game
+        function confirmDeleteGame(game) {
+            if (confirm(`Are you sure you want to delete "${game.name}"? This action cannot be undone.`)) {
+                deleteGame(game.id);
+            }
+        }
+        
+        // Delete game
+        async function deleteGame(gameId = null) {
+            const idToDelete = gameId || document.getElementById('editGameId').value;
+            if (!idToDelete) return;
+            
+            const deleteBtn = document.getElementById('deleteGameBtn');
+            const originalText = deleteBtn.innerHTML;
+            
+            try {
+                deleteBtn.disabled = true;
+                deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+                
+                // First delete all ratings for this game
+                const { error: ratingsError } = await supabase
+                    .from('ratings')
+                    .delete()
+                    .eq('game_id', idToDelete);
+                
+                if (ratingsError) throw ratingsError;
+                
+                // Then delete the game
+                const { error: gameError } = await supabase
+                    .from('games')
+                    .delete()
+                    .eq('id', idToDelete)
+                    .eq('created_by', userId); // Ensure user owns the game
+                
+                if (gameError) throw gameError;
+                
+                showToast('Game deleted successfully!', 'success');
+                
+                // Refresh game data
+                await loadGames();
+                toggleModal(false);
+                toggleGameDetailsModal(false);
+                
+            } catch (error) {
+                console.error('Error deleting game:', error);
+                showToast('Failed to delete game. You may not have permission.', 'error');
+            } finally {
+                deleteBtn.disabled = false;
+                deleteBtn.innerHTML = originalText;
             }
         }
         
@@ -2434,7 +2728,7 @@
             if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
                 e.preventDefault();
                 if (!addGameModal.classList.contains('active')) {
-                    toggleModal(true);
+                    openAddGameModal();
                 }
             }
             
@@ -2449,6 +2743,7 @@
         console.log('%cWelcome to your gaming database!', 'color: #64748b;');
         console.log('%cFeatures:', 'font-weight: bold; color: #10b981;');
         console.log('• Rate games with star ratings (one per user)');
+        console.log('• Add, edit, and delete your own games');
         console.log('• View game details with YouTube trailers');
         console.log('• Filter by system requirements (GPU, RAM, Storage)');
         console.log('• Dark/Light mode with animations');
