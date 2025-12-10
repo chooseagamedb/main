@@ -1,17 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Razorpay Mastercard Test Payment</title>
+  <title>Razorpay Test Payment ₹10</title>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <style>
     body { font-family: Arial; padding: 20px; }
-    .card-box {
-      background: #f3f3f3;
-      padding: 15px;
-      border-radius: 8px;
-      max-width: 320px;
-      margin-bottom: 20px;
-    }
+    .card-box { background: #f0f0f0; padding: 15px; border-radius: 10px; max-width: 350px; margin-bottom: 20px; }
+    button { padding: 12px 25px; font-size: 18px; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -21,31 +16,46 @@
 <div class="card-box">
   <h3>Mastercard Test Card (India)</h3>
   <p><b>Card Number:</b> 2305 3242 5784 8228</p>
-  <p><b>CVV:</b> Any 3 digit</p>
+  <p><b>CVV:</b> Any 3 digits</p>
   <p><b>Expiry:</b> Any future date</p>
+  <p><b>OTP:</b> 123456</p>
   <p><b>Mode:</b> Test Mode Only</p>
 </div>
 
-<button id="payBtn" style="padding:10px 20px; font-size:16px;">Pay ₹10</button>
+<button id="payBtn">Pay ₹10</button>
 
 <script>
-document.getElementById("payBtn").onclick = function () {
+document.getElementById("payBtn").onclick = async function () {
+
+    // 1️⃣ Call Supabase Edge Function to create an order
+    const res = await fetch('https://zfcndiuombmzehnnvawm.supabase.co/functions/v1/createOrder', {
+        method: 'POST'
+    });
+
+    if (!res.ok) {
+        alert("Failed to create order");
+        return;
+    }
+
+    const order = await res.json();
+
+    // 2️⃣ Open Razorpay Checkout
     var options = {
-        "key": "rzp_test_RpsuZSNWqiz3O8,zzCzSZSzJXeHL6WTAWORORPo",  // ⬅ Replace with your Razorpay TEST key
-        "amount": 10 * 100,
-        "currency": "INR",
-        "name": "Test Mastercard Payment",
-        "description": "Testing Razorpay with Mastercard test card",
-        "handler": function (response){
+        key: "rzp_test_RpsuZSNWqiz3O8", // <-- Replace with your TEST Key ID
+        amount: order.amount,
+        currency: order.currency,
+        name: "Supabase Test Payment",
+        description: "Testing Mastercard Test Card",
+        order_id: order.id,
+        handler: function(response) {
             alert("Payment Successful!\nPayment ID: " + response.razorpay_payment_id);
-            console.log(response);
         },
-        "prefill": {
-            "name": "Test User",
-            "email": "test@example.com",
-            "contact": "9999999999"
+        prefill: {
+            name: "Test User",
+            email: "test@example.com",
+            contact: "9999999999"
         },
-        "theme": { "color": "#528FF0" }
+        theme: { color: "#3399ff" }
     };
 
     var rzp = new Razorpay(options);
