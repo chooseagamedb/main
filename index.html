@@ -3104,11 +3104,11 @@ async function handleDonation() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpmY25kaXVvbWJtemVobm52YXdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzNTkyNTksImV4cCI6MjA4MDkzNTI1OX0.wfUvcghCIWsPAU7GhKS0H8GfyLotn_Kw2Zarwu4Z5ms'
+                'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXAhYmFzZSIsInJlZiI6InpmY25kaXVvbWJtemVobm52YXdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzNTkyNTksImV4cCI6MjA4MDkzNTI1OX0.wfUvcghCIWsPAU7GhKS0H8GfyLotn_Kw2Zarwu4Z5ms'
             },
             body: JSON.stringify({ 
                 amount: 10,
-                receipt: `donation_${Date.now()}_${userId}`,
+                receipt: `donation_${Date.now()}_${userId || 'anonymous'}`,
                 userId: userId || 'anonymous'
             })
         });
@@ -3134,12 +3134,14 @@ async function handleDonation() {
             name: "Choose a Game",
             description: "Community Support Donation - ₹10",
             order_id: orderData.order.id,
-            // ✅ ADD THIS HANDLER TO VERIFY PAYMENT
             handler: async function(response) {
+                console.log('Payment response:', response);
+                
                 try {
-                    showToast('🔄 Verifying payment...', 'info');
+                    // Show loading toast
+                    showToast('🔄 Verifying payment with server...', 'info');
                     
-                    // ✅ CALL YOUR VERIFY PAYMENT FUNCTION
+                    // Call verifyPayment function
                     const verifyResponse = await fetch(
                         'https://zfcndiuombmzehnnvawm.supabase.co/functions/v1/verifyPayment',
                         {
@@ -3160,18 +3162,18 @@ async function handleDonation() {
                     const verification = await verifyResponse.json();
                     
                     if (verification.success) {
+                        console.log('✅ Payment verified:', verification);
                         showToast('❤️ Thank you for your support! Payment verified.', 'success');
-                        console.log('Payment verified and stored:', verification);
                         
-                        // Update donation count
+                        // Update donation count locally
                         trackDonation();
                     } else {
-                        showToast(`⚠️ Payment verification failed: ${verification.error}`, 'error');
-                        console.error('Payment verification failed:', verification);
+                        console.error('❌ Payment verification failed:', verification);
+                        showToast(`⚠️ ${verification.error || 'Payment verification failed'}`, 'error');
                     }
                     
                 } catch (error) {
-                    console.error('Verification error:', error);
+                    console.error('🔥 Verification error:', error);
                     showToast('⚠️ Could not verify payment. Please contact support.', 'error');
                 }
             },
@@ -3183,6 +3185,7 @@ async function handleDonation() {
             theme: { color: "#FF6B6B" },
             modal: {
                 ondismiss: function() {
+                    console.log('Payment modal closed');
                     showToast('Payment cancelled', 'info');
                 }
             }
@@ -3192,12 +3195,69 @@ async function handleDonation() {
         rzp.open();
 
     } catch (error) {
-        console.error('Donation error:', error);
+        console.error('Donation setup error:', error);
         showToast(`Error: ${error.message}`, 'error');
     }
 }
 
-// Helper to load Razorpay script
+// Helper function to load Razorpay script
+function loadRazorpayScript() {
+    return new Promise((resolve, reject) => {
+        if (window.Razorpay) {
+            console.log('Razorpay already loaded');
+            resolve();
+            return;
+        }
+        
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.onload = () => {
+            console.log('✅ Razorpay SDK loaded');
+            resolve();
+        };
+        script.onerror = (error) => {
+            console.error('❌ Failed to load Razorpay SDK:', error);
+            reject(new Error('Failed to load payment system'));
+        };
+        document.body.appendChild(script);
+    });
+}
+
+// Update trackDonation function
+function trackDonation() {
+    let donationCount = parseInt(localStorage.getItem('donationCount') || '0');
+    donationCount++;
+    localStorage.setItem('donationCount', donationCount.toString());
+    
+    // Update UI if you have a badge
+    const badge = document.querySelector('.donation-badge');
+    if (badge) {
+        badge.textContent = donationCount;
+        badge.style.display = 'inline-block';
+    }
+    
+    console.log(`Donation count: ${donationCount}`);
+    return donationCount;
+}
+
+// Initialize donation badge on page load
+function initDonationBadge() {
+    const donationCount = localStorage.getItem('donationCount');
+    if (donationCount && parseInt(donationCount) > 0) {
+        // Add badge to button if not exists
+        if (!donationButton.querySelector('.donation-badge')) {
+            donationButton.classList.add('with-badge');
+            const badge = document.createElement('span');
+            badge.className = 'donation-badge';
+            badge.textContent = donationCount;
+            donationButton.appendChild(badge);
+        }
+    }
+}
+
+// Call this in your initialization
+// initDonationBadge();
+
 function loadRazorpayScript() {
     return new Promise((resolve, reject) => {
         if (window.Razorpay) {
@@ -3207,10 +3267,7 @@ function loadRazorpayScript() {
         
         const script = document.createElement('script');
         script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-        script.onload = () => {
-            console.log('Razorpay SDK loaded');
-            resolve();
-        };
+        script.onload = () => resolve();
         script.onerror = () => reject(new Error('Failed to load Razorpay SDK'));
         document.body.appendChild(script);
     });
