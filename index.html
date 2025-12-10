@@ -26,40 +26,51 @@
 
 <script>
 document.getElementById("payBtn").onclick = async function () {
+    try {
+        // 1️⃣ Call Supabase Edge Function using anon key
+        const res = await fetch('https://zfcndiuombmzehnnvawm.supabase.co/functions/v1/createOrder', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpmY25kaXVvbWJtemVobm52YXdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzNTkyNTksImV4cCI6MjA4MDkzNTI1OX0.wfUvcghCIWsPAU7GhKS0H8GfyLotn_Kw2Zarwu4Z5ms'
+            },
+            body: JSON.stringify({ amount: 10 })
+        });
 
-    // 1️⃣ Call Supabase Edge Function to create an order
-    const res = await fetch('https://zfcndiuombmzehnnvawm.supabase.co/functions/v1/createOrder', {
-        method: 'POST'
-    });
+        if (!res.ok) throw new Error("Failed to create order");
 
-    if (!res.ok) {
-        alert("Failed to create order");
-        return;
+        const order = await res.json();
+
+        // 2️⃣ Open Razorpay Checkout
+        const options = {
+            key: "rzp_test_RpsuZSNWqiz3O8", // Your Razorpay Test Key ID
+            amount: order.amount,
+            currency: order.currency,
+            name: "Supabase Test Payment",
+            description: "Mastercard Test",
+            order_id: order.id,
+            handler: function(response) {
+                alert(
+                    "Payment Successful!\n" +
+                    "Payment ID: " + response.razorpay_payment_id + "\n" +
+                    "Order ID: " + response.razorpay_order_id
+                );
+            },
+            prefill: {
+                name: "Test User",
+                email: "test@example.com",
+                contact: "9999999999"
+            },
+            theme: { color: "#3399ff" }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.open();
+
+    } catch (err) {
+        console.error(err);
+        alert("Error: " + err.message);
     }
-
-    const order = await res.json();
-
-    // 2️⃣ Open Razorpay Checkout
-    var options = {
-        key: "rzp_test_RpsuZSNWqiz3O8", // <-- Replace with your TEST Key ID
-        amount: order.amount,
-        currency: order.currency,
-        name: "Supabase Test Payment",
-        description: "Testing Mastercard Test Card",
-        order_id: order.id,
-        handler: function(response) {
-            alert("Payment Successful!\nPayment ID: " + response.razorpay_payment_id);
-        },
-        prefill: {
-            name: "Test User",
-            email: "test@example.com",
-            contact: "9999999999"
-        },
-        theme: { color: "#3399ff" }
-    };
-
-    var rzp = new Razorpay(options);
-    rzp.open();
 };
 </script>
 
