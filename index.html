@@ -3119,9 +3119,10 @@ async function handleDonation() {
         const orderData = await orderResponse.json();
         if (!orderData.success) throw new Error(orderData.error);
 
-        // 2. Load Razorpay
-        await loadRazorpayScript();
-
+        // 2. Load Razorpay SDK
+        console.log('Loading Razorpay SDK...');
+        await loadRazorpayScript(); // This calls the function
+        
         // 3. Open Razorpay checkout
         const options = {
             key: orderData.key_id,
@@ -3133,42 +3134,7 @@ async function handleDonation() {
             handler: async function(paymentResponse) {
                 console.log('✅ Payment successful, verifying...', paymentResponse);
                 
-                // 4. Verify and store payment
-                try {
-                    const verifyResponse = await fetch('https://zfcndiuombmzehnnvawm.supabase.co/functions/v1/verifyPayment', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpmY25kaXVvbWJtemVobm52YXdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzNTkyNTksImV4cCI6MjA4MDkzNTI1OX0.wfUvcghCIWsPAU7GhKS0H8GfyLotn_Kw2Zarwu4Z5ms'
-                        },
-                        body: JSON.stringify({
-                            razorpay_payment_id: paymentResponse.razorpay_payment_id,
-                            razorpay_order_id: paymentResponse.razorpay_order_id,
-                            razorpay_signature: paymentResponse.razorpay_signature,
-                            userId: userId || 'anonymous'
-                        })
-                    });
-                    
-                    const verification = await verifyResponse.json();
-                    
-                    if (verification.success) {
-                        // 🎉 SUCCESS - Payment verified and stored
-                        console.log('💾 Payment stored in database:', verification);
-                        
-                        // Track locally
-                        trackDonationLocally(paymentResponse, 10);
-                        
-                        // Update supporter count
-                        updateSupporterCount();
-                        
-                        showToast('❤️ Thank you for supporting Choose a Game!', 'success');
-                    } else {
-                        showToast('Payment verification failed. Please contact support.', 'error');
-                    }
-                } catch (verifyError) {
-                    console.error('Verification error:', verifyError);
-                    showToast('Payment successful but verification failed. Contact support with payment ID.', 'warning');
-                }
+                // ... rest of your handler code
             },
             prefill: { 
                 name: "Supporter", 
@@ -3177,11 +3143,6 @@ async function handleDonation() {
             },
             theme: { 
                 color: "#FF6B6B" 
-            },
-            modal: {
-                ondismiss: function() {
-                    showToast('Donation cancelled. You can support us anytime! 🙏', 'info');
-                }
             }
         };
 
@@ -3198,75 +3159,47 @@ async function handleDonation() {
         showToast(`Error: ${error.message}`, 'error');
     }
 }
-
-// Track donation locally
-function trackDonationLocally(paymentResponse, amount) {
-    const donation = {
-        id: `local_${Date.now()}`,
-        payment_id: paymentResponse.razorpay_payment_id,
-        order_id: paymentResponse.razorpay_order_id,
-        amount: amount,
-        date: new Date().toISOString(),
-        userId: userId || 'anonymous'
-    };
-    
-    // Save to localStorage
-    let localDonations = JSON.parse(localStorage.getItem('localDonations') || '[]');
-    localDonations.push(donation);
-    localStorage.setItem('localDonations', JSON.stringify(localDonations));
-    
-    // Update badge
-    updateSupporterBadge();
+// Helper to load Razorpay script dynamically
+function loadRazorpayScript() {
+    return new Promise((resolve, reject) => {
+        // Check if already loaded
+        if (window.Razorpay) {
+            console.log('✅ Razorpay SDK already loaded');
+            resolve();
+            return;
+        }
+        
+        // Check if script tag already exists
+        if (document.querySelector('script[src*="razorpay.com"]')) {
+            console.log('✅ Razorpay script tag already exists, waiting...');
+            // Wait for it to load
+            const checkInterval = setInterval(() => {
+                if (window.Razorpay) {
+                    clearInterval(checkInterval);
+                    resolve();
+                }
+            }, 100);
+            return;
+        }
+        
+        // Create and load the script
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.async = true;
+        
+        script.onload = () => {
+            console.log('✅ Razorpay SDK loaded successfully');
+            resolve();
+        };
+        
+        script.onerror = () => {
+            console.error('❌ Failed to load Razorpay SDK');
+            reject(new Error('Failed to load Razorpay payment system'));
+        };
+        
+        document.body.appendChild(script);
+    });
 }
-
-// Update supporter count and badge
-function updateSupporterCount() {
-    let count = parseInt(localStorage.getItem('totalSupporters') || '0');
-    count++;
-    localStorage.setItem('totalSupporters', count);
-    
-    // Update badge on button
-    const badge = document.querySelector('.donation-badge') || createBadge();
-    badge.textContent = count;
-    badge.style.display = 'block';
-}
-
-// Create badge if not exists
-function createBadge() {
-    const badge = document.createElement('span');
-    badge.className = 'donation-badge';
-    badge.style.cssText = `
-        position: absolute;
-        top: -8px;
-        right: -8px;
-        background: #10b981;
-        color: white;
-        font-size: 0.7rem;
-        padding: 2px 6px;
-        border-radius: 10px;
-        font-weight: 700;
-        min-width: 18px;
-        text-align: center;
-    `;
-    document.getElementById('donateButton').appendChild(badge);
-    document.getElementById('donateButton').style.position = 'relative';
-    return badge;
-}
-
-// Initialize on page load
-function initDonationSystem() {
-    const count = localStorage.getItem('totalSupporters') || 0;
-    if (count > 0) {
-        updateSupporterCount();
-    }
-}
-
-// Add to your existing init
-document.addEventListener('DOMContentLoaded', () => {
-    initTheme();
-    initUserId();
-    initDonationSystem(); // Add this
-});
 
 // Optional: Track donations locally
 function trackDonation() {
